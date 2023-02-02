@@ -1,0 +1,33 @@
+{
+  "files.exclude": {
+    "**/dist/": true,
+    "**/node_modules/": true,
+    "**/coverage/": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "comms",
+    "Ethereum",
+    "IPFS",
+    "Metaverse",
+    "openapi"
+  ],
+  "editor.rulers": [
+    120
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.organizeImports": true
+  },
+  "eslint.validate": [
+    "typescript"
+  ],
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true,
+  "jestrunner.runOptions": [
+    "--forceExit"
+  ],
+  "typescript.preferences.importModuleSpecifier": "relative",
+}

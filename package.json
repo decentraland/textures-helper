@@ -8,7 +8,13 @@
   "devDependencies": {
     "@sinonjs/fake-timers": "6",
     "@types/node": "^18.7.13",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
     "@well-known-components/test-helpers": "^1.4.0",
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.3",
     "typescript": "^4.8.3"
   },
   "prettier": {
