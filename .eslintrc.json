@@ -4,7 +4,8 @@
     "sourceType": "module", // Allows for the use of imports
     "project": [
       // Specify it only for TypeScript files
-      "./tsconfig.json"
+      "./tsconfig.json",
+      "./test/tsconfig.json"
     ]
   },
   "extends": [
@@ -12,10 +13,12 @@
     "plugin:prettier/recommended" // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
   ],
   "rules": {
-    // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
-    "@typescript-eslint/no-inferrable-types": 0,
-    "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-floating-promises": 2
+    "prettier/prettier": ["error", {
+      "printWidth": 120,
+      "semi": false,
+      "singleQuote": true,
+      "trailingComma": "none",
+      "tabWidth": 2
+    }]
   }
 }

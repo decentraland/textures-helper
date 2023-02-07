@@ -5,7 +5,7 @@
     "**/coverage/": true
   },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.formatOnSave": true,
+  // "editor.formatOnSave": true,
   "cSpell.words": [
     "comms",
     "Ethereum",
@@ -16,10 +16,10 @@
   "editor.rulers": [
     120
   ],
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.organizeImports": true
-  },
+  // "editor.codeActionsOnSave": {
+  //   "source.fixAll.eslint": true,
+  //   "source.organizeImports": true
+  // },
   "eslint.validate": [
     "typescript"
   ],
