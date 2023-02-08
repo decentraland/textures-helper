@@ -4,10 +4,10 @@ on:
   push:
 
 jobs:
-  install:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - name: Use Node.js 16.x
         uses: actions/setup-node@v3
         with:
@@ -15,7 +15,11 @@ jobs:
           cache: yarn
       - name: install
         run: yarn install --frozen-lockfile
+      - name: check code lint
+        run:  yarn lint:check
       - name: build
         run: yarn build
+      - name: create .env
+        run: echo "" >> .env
       - name: test
-        run: yarn test
+        run: yarn test:coverage

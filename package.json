@@ -3,7 +3,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
-    "test": "jest --forceExit --detectOpenHandles --coverage --verbose --passWithNoTests",
+    "test": "jest --forceExit --detectOpenHandles --verbose --passWithNoTests",
+    "test:coverage": "jest --forceExit --detectOpenHandles --coverage --verbose --passWithNoTests",
     "lint:check": "eslint '**/*.{js,ts}'",
     "lint:fix": "eslint '**/*.{js,ts}' --fix"
   },
