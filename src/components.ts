@@ -10,10 +10,11 @@ import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-k
 import * as os from 'os'
 import { createFetchComponent } from './adapters/fetch'
 import { createFileManager } from './adapters/fileSystem'
-import { createConversionBuilder } from './logic/asset-converter'
+import createAssetConverter from './logic/asset-converter'
 import createAssetRetriever from './logic/assetRetriever'
 import { metricDeclarations } from './metrics'
 import { AppComponents, GlobalContext } from './types'
+import createCommandTrigger from './adapters/commandLine'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -37,7 +38,7 @@ export async function initComponents(): Promise<AppComponents> {
     bucket: bucketStorage
   }
 
-  const conversionBuilder = createConversionBuilder(storageDirectory)
+  const assetConverter = createAssetConverter(createCommandTrigger())
   const assetRetriever = await createAssetRetriever((await config.getString('CONTENT_URL')) || '')
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
@@ -50,7 +51,7 @@ export async function initComponents(): Promise<AppComponents> {
     fetch,
     metrics,
     storages,
-    conversionBuilder,
+    assetConverter,
     assetRetriever
   }
 }

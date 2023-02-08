@@ -7,9 +7,9 @@ import type {
   ILoggerComponent,
   IMetricsComponent
 } from '@well-known-components/interfaces'
-import { ConversionBuilder } from './logic/asset-converter'
 import { metricDeclarations } from './metrics'
 import IFileSystem from './ports/IFileSystem'
+import { IAssetConverter } from './types/asset-converter'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -23,7 +23,7 @@ export type BaseComponents = {
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   storages: { local: IFileSystem; bucket: IContentStorageComponent }
-  conversionBuilder: ConversionBuilder
+  assetConverter: IAssetConverter
   assetRetriever: (hash: string) => Promise<ArrayBuffer>
 }
 

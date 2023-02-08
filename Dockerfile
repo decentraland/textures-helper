@@ -16,24 +16,21 @@ WORKDIR /app
 
 # some packages require a build step
 RUN apt-get update
-RUN apt-get -y -qq install python-setuptools build-essential
+RUN apt-get -y -qq install python-setuptools build-essential gnupg curl
 
 # We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 
-# install yarn
-RUN apt-get update
-RUN apt-get install -y gnupg curl
+# add yarn and nodejs repositories
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update
-RUN apt-get install -y yarn
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 
 # update nodejs
-RUN curl -sL https://deb.nodesource.com/setup_19.x | bash -
-RUN apt-get install -y nodejs
+RUN apt-get update
+RUN apt-get install -y nodejs yarn
 
 # install dependencies
 COPY package.json /app/package.json
