@@ -6,6 +6,9 @@ WORKDIR /app
 
 RUN apt-get update
 RUN apt-get -y -qq install make build-essential git
+RUN apt-get install -y libc6-dev
+
+RUN cp /lib/x86_64-linux-gnu/libc.so.6 /lib/
 
 RUN git clone https://github.com/BinomialLLC/crunch.git
 RUN ls && cd crunch/crnlib && make
@@ -43,7 +46,10 @@ RUN yarn run build
 RUN yarn run test
 
 # remove devDependencies, keep only used dependencies
-RUN yarn install --frozen-lockfile
+RUN yarn install --prod --frozen-lockfile
+
+ARG COMMIT_HASH
+RUN echo "COMMIT_HASH=$COMMIT_HASH" >> .env
 
 ########################## END OF BUILD STAGE ##########################
 
@@ -53,6 +59,7 @@ FROM node:lts
 ENV NODE_ENV production
 
 WORKDIR /app
+COPY --from=builderlibrary /lib/libc.so.6 /lib/
 COPY --from=builderlibrary /app/crunch/crnlib/crunch /usr/local/bin/
 COPY --from=builderenv /app /app
 COPY --from=builderenv /tini /tini
