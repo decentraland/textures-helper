@@ -1,17 +1,36 @@
 ARG RUN
 
-FROM node:lts as builderenv
+FROM amd64/ubuntu as builderlibrary
+
+WORKDIR /app
+
+RUN apt-get update
+RUN apt-get -y -qq install make build-essential git
+
+RUN git clone https://github.com/BinomialLLC/crunch.git
+RUN ls && cd crunch/crnlib && make
+
+FROM amd64/ubuntu as builderenv
 
 WORKDIR /app
 
 # some packages require a build step
 RUN apt-get update
-RUN apt-get -y -qq install python-setuptools python-dev build-essential
+RUN apt-get -y -qq install python-setuptools build-essential gnupg curl
 
 # We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
+
+# add yarn and nodejs repositories
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+
+# update nodejs
+RUN apt-get update
+RUN apt-get install -y nodejs yarn
 
 # install dependencies
 COPY package.json /app/package.json
@@ -34,8 +53,10 @@ FROM node:lts
 ENV NODE_ENV production
 
 WORKDIR /app
+COPY --from=builderlibrary /app/crunch/crnlib/crunch /usr/local/bin/
 COPY --from=builderenv /app /app
 COPY --from=builderenv /tini /tini
+
 # Please _DO NOT_ use a custom ENTRYPOINT because it may prevent signals
 # (i.e. SIGTERM) to reach the service
 # Read more here: https://aws.amazon.com/blogs/containers/graceful-shutdowns-with-ecs/

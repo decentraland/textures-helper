@@ -1,12 +1,15 @@
-import type { IFetchComponent } from "@well-known-components/http-server"
+import { IContentStorageComponent } from '@dcl/catalyst-storage'
+import type { IFetchComponent } from '@well-known-components/http-server'
 import type {
-  IConfigComponent,
-  ILoggerComponent,
-  IHttpServerComponent,
   IBaseComponent,
-  IMetricsComponent,
-} from "@well-known-components/interfaces"
-import { metricDeclarations } from "./metrics"
+  IConfigComponent,
+  IHttpServerComponent,
+  ILoggerComponent,
+  IMetricsComponent
+} from '@well-known-components/interfaces'
+import { metricDeclarations } from './metrics'
+import IFileSystem from './ports/IFileSystem'
+import { IAssetConverter } from './types/asset-converter'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -19,6 +22,9 @@ export type BaseComponents = {
   server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
+  storages: { local: IFileSystem; bucket: IContentStorageComponent }
+  assetConverter: IAssetConverter
+  assetRetriever: (hash: string) => Promise<ArrayBuffer>
 }
 
 // components used in runtime

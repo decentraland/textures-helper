@@ -4,7 +4,8 @@
     "sourceType": "module", // Allows for the use of imports
     "project": [
       // Specify it only for TypeScript files
-      "./tsconfig.json"
+      "./tsconfig.json",
+      "./test/tsconfig.json"
     ]
   },
   "extends": [
@@ -16,6 +17,11 @@
     "@typescript-eslint/no-inferrable-types": 0,
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-floating-promises": 2
+    "@typescript-eslint/no-floating-promises": 2,
+    "prettier/prettier": ["error", {
+      "singleQuote": true,
+      "trailingComma": "none",
+      "tabWidth": 2
+    }]
   }
 }
