@@ -1,8 +1,3 @@
-import {
-  createAwsS3BasedFileSystemContentStorage,
-  createFolderBasedFileSystemContentStorage,
-  createFsComponent
-} from '@dcl/catalyst-storage'
 import { createDotEnvConfigComponent } from '@well-known-components/env-config-provider'
 import { createServerComponent, createStatusCheckComponent } from '@well-known-components/http-server'
 import { createLogComponent } from '@well-known-components/logger'
@@ -15,6 +10,10 @@ import createAssetRetriever from './logic/assetRetriever'
 import { metricDeclarations } from './metrics'
 import { AppComponents, GlobalContext } from './types'
 import createCommandTrigger from './adapters/commandLine'
+import { uploadDir } from '@dcl/cdn-uploader'
+
+import * as AWS from 'aws-sdk'
+import * as MockAws from 'mock-aws-s3'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -24,14 +23,12 @@ export async function initComponents(): Promise<AppComponents> {
   const server = await createServerComponent<GlobalContext>({ config, logs }, {})
   const statusChecks = await createStatusCheckComponent({ server, config })
   const fetch = await createFetchComponent()
-  const fs = createFsComponent()
 
-  const bucket = await config.getString('BUCKET')
   const storageDirectory = (await config.getString('STORAGE_DIRECTORY')) || `${os.tmpdir()}`
 
-  const bucketStorage = bucket
-    ? await createAwsS3BasedFileSystemContentStorage({ fs, config }, bucket)
-    : await createFolderBasedFileSystemContentStorage({ fs }, storageDirectory)
+  const s3Bucket = await config.getString('BUCKET')
+  const cdnS3 = s3Bucket ? new AWS.S3({}) : new MockAws.S3({})
+  const bucketStorage = uploadDir
 
   const storages = {
     local: createFileManager(storageDirectory),
@@ -52,6 +49,7 @@ export async function initComponents(): Promise<AppComponents> {
     metrics,
     storages,
     assetConverter,
-    assetRetriever
+    assetRetriever,
+    cdnS3
   }
 }
