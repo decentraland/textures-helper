@@ -22,7 +22,7 @@ export async function resizeHandler(
   if (!assetHash || !lengthRequired || isNaN(Number(lengthRequired))) return { status: 400 }
 
   const sizeBelow8K = lengthRequired <= 8 * 1024
-  const isPowerOfTwo = Math.pow(2, Math.log(lengthRequired) / Math.log(2)) === lengthRequired
+  const isPowerOfTwo = Math.pow(2, Math.floor(Math.log(lengthRequired) / Math.log(2)))) === lengthRequired
   if (!sizeBelow8K || !isPowerOfTwo) {
     return { status: 406 }
   }
