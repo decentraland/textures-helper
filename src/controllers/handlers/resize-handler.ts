@@ -59,7 +59,6 @@ export async function resizeHandler(
       return { status: 400 }
     }
 
-    await storages.bucket.storeStream(assetToUploadName, storages.local.asReadable(convertedAssetName))
     const bucket = await config.getString('BUCKET')
     await cdnS3
       .upload({
