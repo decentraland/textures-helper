@@ -10,6 +10,7 @@ import type {
 import { metricDeclarations } from './metrics'
 import IFileSystem from './ports/IFileSystem'
 import { IAssetConverter } from './types/asset-converter'
+import { S3 } from 'aws-sdk'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -22,9 +23,10 @@ export type BaseComponents = {
   server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  storages: { local: IFileSystem; bucket: IContentStorageComponent }
+  storages: { local: IFileSystem; bucket: any }
   assetConverter: IAssetConverter
   assetRetriever: (hash: string) => Promise<ArrayBuffer>
+  cdnS3: S3
 }
 
 // components used in runtime

@@ -1,5 +1,6 @@
 import { ILoggerComponent } from '@well-known-components/interfaces'
 import { HandlerContextWithPath } from '../../types'
+import {} from '@dcl/cdn-uploader'
 
 const silentError = (logger: ILoggerComponent.ILogger, nameOfAction: string) => (error: Error) => {
   logger.error('Process failed while ' + nameOfAction, { error: error.message })
@@ -7,12 +8,12 @@ const silentError = (logger: ILoggerComponent.ILogger, nameOfAction: string) => 
 
 export async function resizeHandler(
   context: HandlerContextWithPath<
-    'storages' | 'assetConverter' | 'assetRetriever' | 'config' | 'logs',
+    'storages' | 'assetConverter' | 'assetRetriever' | 'config' | 'logs' | 'cdnS3',
     '/content/:hash/dxt/:length'
   >
 ) {
   const {
-    components: { storages, assetConverter, assetRetriever, config, logs },
+    components: { storages, assetConverter, assetRetriever, config, logs, cdnS3 },
     params
   } = context
   const logger = logs.getLogger('resize-handler')
@@ -61,6 +62,17 @@ export async function resizeHandler(
       }
 
       await storages.bucket.storeStream(assetToUploadName, storages.local.asReadable(convertedAssetName))
+      const bucket = await config.getString('BUCKET')
+      await cdnS3
+        .upload({
+          Bucket: bucket as string,
+          Key: assetToUploadName,
+          Body: storages.local.asReadable(convertedAssetName),
+          CacheControl: 'max-age=3600,s-maxage=3600',
+          ACL: 'public-read'
+        })
+        .promise()
+
       await storages.local.deleteFile(convertedAssetName).catch(silentError(logger, 'deleting ' + convertedAssetName))
     }
 
