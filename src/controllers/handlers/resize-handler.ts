@@ -65,7 +65,7 @@ export async function resizeHandler(
     }
 
     return {
-      body: { asset: `${await config.getString('BUCKET')}/${assetToUploadName}` }
+      body: { asset: `${await config.getString('BUCKET_DOMAIN')}/${assetToUploadName}` }
     }
   } catch (error: any) {
     logger.error('Process failed', { error: error.message })
