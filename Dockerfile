@@ -10,41 +10,40 @@ RUN apt-get -y -qq install make build-essential git
 RUN git clone https://github.com/BinomialLLC/crunch.git
 RUN ls && cd crunch/crnlib && make
 
+# This step builds the whole environment needed to run the service
 FROM amd64/ubuntu as builderenv
 
 WORKDIR /app
 
-# some packages require a build step
+# Install environment dependencies
 RUN apt-get update
 RUN apt-get -y -qq install python-setuptools build-essential gnupg curl
 
-# We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
+## We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 
-# add yarn and nodejs repositories
+## Upgrade node version and install yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-
-# update nodejs
-RUN apt-get update
 RUN apt-get install -y nodejs yarn
 
-# install dependencies
+## Install service dependencies
 COPY package.json /app/package.json
 COPY yarn.lock /app/yarn.lock
 RUN yarn install --frozen-lockfile
 
-# build the app
+## Build app
 COPY . /app
 RUN yarn run build
 RUN yarn run test
 
-# remove devDependencies, keep only used dependencies
+## Tree-shake dev dependencies
 RUN yarn install --prod --frozen-lockfile
 
+## Create empty .env
 ARG COMMIT_HASH
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> .env
 
@@ -57,6 +56,7 @@ FROM amd64/ubuntu
 ENV NODE_ENV production
 
 WORKDIR /app
+
 COPY --from=builderlibrary /app/crunch/crnlib/crunch /usr/local/bin/
 COPY --from=builderenv /app /app
 COPY --from=builderenv /tini /tini

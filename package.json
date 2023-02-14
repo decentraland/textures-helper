@@ -12,9 +12,11 @@
     "@dcl/eslint-config": "^1.1.0",
     "@sinonjs/fake-timers": "6",
     "@types/mock-aws-s3": "^2.6.3",
+    "@types/mock-fs": "^4.13.1",
     "@types/node": "^18.7.13",
     "@well-known-components/test-helpers": "^1.4.0",
     "eslint-config-prettier": "^8.6.0",
+    "mock-fs": "^5.2.0",
     "typescript": "^4.8.3"
   },
   "prettier": {
@@ -23,7 +25,6 @@
   },
   "dependencies": {
     "@dcl/catalyst-storage": "^2.0.3",
-    "@dcl/cdn-uploader": "^1.4.0",
     "@well-known-components/env-config-provider": "^1.1.1",
     "@well-known-components/http-server": "^1.1.6-20220927190058.commit-2dfb235",
     "@well-known-components/interfaces": "^1.1.2",
