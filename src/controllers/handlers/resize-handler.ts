@@ -46,14 +46,13 @@ export async function resizeHandler({
       out: convertedAssetName
     })
 
-    await storages.local.deleteFile(originalAssetName, { withSilentFail: true })
-
     if (conversionResult.failed) {
       return { status: 400, body: { message: 'Conversion process failed.' } }
     }
 
     const assetURL = await storages.bucket.upload(assetToUploadName, storages.local.asReadable(convertedAssetName))
 
+    await storages.local.deleteFile(originalAssetName, { withSilentFail: true })
     await storages.local.deleteFile(convertedAssetName, { withSilentFail: true })
 
     return {
