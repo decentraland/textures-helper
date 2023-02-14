@@ -5,7 +5,7 @@
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
     "test": "jest --forceExit --detectOpenHandles --verbose --passWithNoTests",
     "test:coverage": "jest --forceExit --detectOpenHandles --coverage --verbose --passWithNoTests",
-    "lint:check": "eslint '**/*.{js,ts}'",
+    "lint:check": "NODE_OPTIONS=--max-old-space-size=4096 eslint '**/*.{js,ts}'",
     "lint:fix": "eslint '**/*.{js,ts}' --fix"
   },
   "devDependencies": {
