@@ -8,7 +8,7 @@ export async function createFileSystemAdapter({
   logs
 }: Pick<AppComponents, 'config' | 'logs'>): Promise<IFileSystem> {
   const contentDirectory: string = (await config.getString('STORAGE_DIRECTORY')) || `${os.tmpdir()}`
-  const logger = logs.getLogger('fileSystem')
+  const logger = logs.getLogger('file-system')
   logger.info('Setting file system adapter with', { contentDirectory })
 
   async function saveFile(file: string, data: ArrayBuffer): Promise<string> {
@@ -28,7 +28,7 @@ export async function createFileSystemAdapter({
     return fs.unlink(`${contentDirectory}/${file}`).catch((error) => {
       if (!options.withSilentFail) throw error
 
-      logger.error('Process fail while deleting a file', { file })
+      logger.error('Process failed while deleting a file', { file })
     })
   }
 

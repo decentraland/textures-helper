@@ -19,31 +19,31 @@ WORKDIR /app
 RUN apt-get update
 RUN apt-get -y -qq install python-setuptools build-essential gnupg curl
 
-## We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
+# We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 
-## Upgrade node version and install yarn
+# Upgrade node version and install yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install -y nodejs yarn
 
-## Install service dependencies
+# Install service dependencies
 COPY package.json /app/package.json
 COPY yarn.lock /app/yarn.lock
 RUN yarn install --frozen-lockfile
 
-## Build app
+# Build app
 COPY . /app
 RUN yarn run build
 RUN yarn run test
 
-## Tree-shake dev dependencies
+# Install prod dependencies
 RUN yarn install --prod --frozen-lockfile
 
-## Create empty .env
+# Create empty .env
 ARG COMMIT_HASH
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> .env
 

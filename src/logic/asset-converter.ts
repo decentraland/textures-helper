@@ -22,7 +22,7 @@ export default function createAssetConverter(commandTrigger: ICommandLine): IAss
 
   async function convert(fileToConvert: string, options: CrunchConversionOptions): Promise<ConversionResult> {
     const args = getArguments(fileToConvert, options)
-    return commandTrigger.execute('crunch', args)
+    return await commandTrigger.execute('crunch', args)
   }
 
   return { convert }

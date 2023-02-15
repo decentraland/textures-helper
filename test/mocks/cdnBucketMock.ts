@@ -1,11 +1,10 @@
-import * as AWS from 'aws-sdk'
 import * as stream from 'stream'
-import { AppComponents } from '../types'
-import ICDNBucket from '../ports/ICDNBucket'
+import ICDNBucket from '../../src/ports/ICDNBucket'
+import * as MockAws from 'mock-aws-s3'
 
-export async function createCDNBucket({ config }: Pick<AppComponents, 'config'>): Promise<ICDNBucket> {
-  const bucketName = await config.getString('BUCKET')
-  const bucket = new AWS.S3({})
+export function createCDNBucketMock(): ICDNBucket {
+  const bucketName = 'test'
+  const bucket = new MockAws.S3({})
 
   async function upload(fileName: string, file: stream.Readable): Promise<string> {
     return bucket

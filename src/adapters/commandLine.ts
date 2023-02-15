@@ -4,9 +4,9 @@ import { AppComponents } from './../types'
 import { ConversionResult } from '../types/asset-converter'
 
 export default async function createCommandLineAdapter({ logs }: Pick<AppComponents, 'logs'>): Promise<ICommandLine> {
-  const logger = logs.getLogger('commandLineAdapter')
+  const logger = logs.getLogger('command-line-adapter')
 
-  function execute(command: string, args: string[]): Promise<ConversionResult> {
+  async function execute(command: string, args: string[]): Promise<ConversionResult> {
     const process = spawn(command, args)
 
     process.stderr?.on('data', (data: Buffer) => {
