@@ -1,4 +1,5 @@
 import { HandlerContextWithPath } from '../../types'
+import { AssetMetadata } from '../../types/asset-analyzer'
 
 // check using bit representation
 function isPowerOfTwo(length: number): boolean {
@@ -7,8 +8,11 @@ function isPowerOfTwo(length: number): boolean {
 
 export async function resizeHandler({
   params,
-  components: { storages, assetConverter, assetRetriever, logs }
-}: Pick<HandlerContextWithPath<'storages' | 'assetConverter' | 'assetRetriever' | 'logs'>, 'components' | 'params'>) {
+  components: { storages, logs, assetConverter, assetRetriever, assetAnalyzer }
+}: Pick<
+  HandlerContextWithPath<'storages' | 'logs' | 'assetConverter' | 'assetRetriever' | 'assetAnalyzer'>,
+  'components' | 'params'
+>) {
   const logger = logs.getLogger('resize-handler')
 
   logger.info('Processing with', { hash: params.hash, length: params.length })
@@ -29,7 +33,7 @@ export async function resizeHandler({
   try {
     const asset: ArrayBuffer = await assetRetriever.getAsset(params.hash)
 
-    if (!asset) {
+    if (!asset || !asset.byteLength) {
       return {
         status: 404,
         body: {
@@ -38,6 +42,7 @@ export async function resizeHandler({
       }
     }
 
+    const assetMetadata: AssetMetadata = assetAnalyzer.getMetadata(asset)
     const fileToConvert = await storages.local.saveFile(originalAssetName, asset)
 
     const conversionResult = await assetConverter.convert(fileToConvert, {
@@ -57,7 +62,11 @@ export async function resizeHandler({
 
     return {
       status: 200,
-      body: { asset: assetURL }
+      body: {
+        asset: assetURL,
+        heightRatio: params.length / (assetMetadata.height ? assetMetadata.height : 1),
+        widthRatio: params.length / (assetMetadata.width ? assetMetadata.width : 1)
+      }
     }
   } catch (error: any) {
     logger.error('Process failed', { error: error.message })

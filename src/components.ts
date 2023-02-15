@@ -10,6 +10,7 @@ import { metricDeclarations } from './metrics'
 import { AppComponents, GlobalContext } from './types'
 import createCommandLineAdapter from './adapters/commandLine'
 import { createCDNBucket } from './adapters/cdnBucket'
+import createAssetAnalyzer from './logic/assetAnalyzer'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -27,6 +28,7 @@ export async function initComponents(): Promise<AppComponents> {
 
   const assetConverter = createAssetConverter(await createCommandLineAdapter({ logs }))
   const assetRetriever = await createAssetRetriever({ config, fetch })
+  const assetAnalyzer = createAssetAnalyzer()
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
@@ -39,6 +41,7 @@ export async function initComponents(): Promise<AppComponents> {
     metrics,
     storages,
     assetConverter,
-    assetRetriever
+    assetRetriever,
+    assetAnalyzer
   }
 }
