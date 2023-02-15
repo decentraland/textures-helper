@@ -11,7 +11,7 @@ import IFileSystem from './ports/IFileSystem'
 import { IAssetConverter } from './types/asset-converter'
 import ICDNBucket from './ports/ICDNBucket'
 import { IAssetRetriever } from './types/assetRetriever'
-import { IAssetAnalyzer } from './types/asset-analyzer'
+import { IResizeRatioCalculator } from './types/asset-analyzer'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -27,7 +27,7 @@ export type BaseComponents = {
   storages: { local: IFileSystem; bucket: ICDNBucket }
   assetConverter: IAssetConverter
   assetRetriever: IAssetRetriever
-  assetAnalyzer: IAssetAnalyzer
+  resizeRatioCalculator: IResizeRatioCalculator
 }
 
 // components used in runtime

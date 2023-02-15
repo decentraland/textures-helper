@@ -5,6 +5,7 @@ import ICDNBucket from '../ports/ICDNBucket'
 
 export async function createCDNBucket({ config }: Pick<AppComponents, 'config'>): Promise<ICDNBucket> {
   const bucketName = await config.getString('BUCKET')
+  const cdnDomain = await config.getString('BUCKET_DOMAIN')
   const bucket = new AWS.S3({})
 
   async function upload(fileName: string, file: stream.Readable): Promise<string> {
@@ -18,6 +19,7 @@ export async function createCDNBucket({ config }: Pick<AppComponents, 'config'>)
       })
       .promise()
       .then((result) => {
+        if (!!cdnDomain) return cdnDomain + fileName
         return result.Location
       })
   }

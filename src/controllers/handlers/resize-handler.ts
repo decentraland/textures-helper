@@ -1,5 +1,6 @@
 import { HandlerContextWithPath } from '../../types'
-import { AssetMetadata } from '../../types/asset-analyzer'
+import { ResizeRatio } from '../../types/asset-analyzer'
+import { ConversionResult } from '../../types/asset-converter'
 
 // check using bit representation
 function isPowerOfTwo(length: number): boolean {
@@ -8,9 +9,9 @@ function isPowerOfTwo(length: number): boolean {
 
 export async function resizeHandler({
   params,
-  components: { storages, logs, assetConverter, assetRetriever, assetAnalyzer }
+  components: { storages, logs, assetConverter, assetRetriever, resizeRatioCalculator }
 }: Pick<
-  HandlerContextWithPath<'storages' | 'logs' | 'assetConverter' | 'assetRetriever' | 'assetAnalyzer'>,
+  HandlerContextWithPath<'storages' | 'logs' | 'assetConverter' | 'assetRetriever' | 'resizeRatioCalculator'>,
   'components' | 'params'
 >) {
   const logger = logs.getLogger('resize-handler')
@@ -42,10 +43,10 @@ export async function resizeHandler({
       }
     }
 
-    const assetMetadata: AssetMetadata = assetAnalyzer.getMetadata(asset)
-    const fileToConvert = await storages.local.saveFile(originalAssetName, asset)
+    const resizeRatio: ResizeRatio = resizeRatioCalculator.calculate(asset, params.length)
+    const fileToConvert: string = await storages.local.saveFile(originalAssetName, asset)
 
-    const conversionResult = await assetConverter.convert(fileToConvert, {
+    const conversionResult: ConversionResult = await assetConverter.convert(fileToConvert, {
       fileFormat: 'crn',
       size: Number(params.length),
       out: convertedAssetName
@@ -55,7 +56,10 @@ export async function resizeHandler({
       return { status: 400, body: { message: 'Conversion process failed.' } }
     }
 
-    const assetURL = await storages.bucket.upload(assetToUploadName, storages.local.asReadable(convertedAssetName))
+    const assetURL: string = await storages.bucket.upload(
+      assetToUploadName,
+      storages.local.asReadable(convertedAssetName)
+    )
 
     await storages.local.deleteFile(originalAssetName, { withSilentFail: true })
     await storages.local.deleteFile(convertedAssetName, { withSilentFail: true })
@@ -64,8 +68,10 @@ export async function resizeHandler({
       status: 200,
       body: {
         asset: assetURL,
-        heightRatio: params.length / (assetMetadata.height ? assetMetadata.height : 1),
-        widthRatio: params.length / (assetMetadata.width ? assetMetadata.width : 1)
+        conversionRatio: {
+          height: resizeRatio.height,
+          width: resizeRatio.width
+        }
       }
     }
   } catch (error: any) {

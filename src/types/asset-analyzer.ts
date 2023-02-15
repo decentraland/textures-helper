@@ -1,9 +1,9 @@
-export type AssetMetadata = {
-  width?: number
-  height?: number
-  type?: string
+export type ResizeRatio = {
+  width: number
+  height: number
+  originalType?: string
 }
 
-export interface IAssetAnalyzer {
-  getMetadata: (file: ArrayBuffer) => AssetMetadata
+export interface IResizeRatioCalculator {
+  calculate: (file: ArrayBuffer, newSizeSquare: number) => ResizeRatio
 }

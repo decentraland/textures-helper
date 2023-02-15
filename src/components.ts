@@ -4,13 +4,13 @@ import { createLogComponent } from '@well-known-components/logger'
 import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-known-components/metrics'
 import { createFetchComponent } from './adapters/fetch'
 import { createFileSystemAdapter } from './adapters/fileSystem'
-import createAssetConverter from './logic/asset-converter'
+import createAssetConverter from './logic/assetConverter'
 import createAssetRetriever from './logic/assetRetriever'
 import { metricDeclarations } from './metrics'
 import { AppComponents, GlobalContext } from './types'
 import createCommandLineAdapter from './adapters/commandLine'
 import { createCDNBucket } from './adapters/cdnBucket'
-import createAssetAnalyzer from './logic/assetAnalyzer'
+import createResizeRatioCalculator from './logic/resizeRatioCalculator'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -28,7 +28,7 @@ export async function initComponents(): Promise<AppComponents> {
 
   const assetConverter = createAssetConverter(await createCommandLineAdapter({ logs }))
   const assetRetriever = await createAssetRetriever({ config, fetch })
-  const assetAnalyzer = createAssetAnalyzer()
+  const resizeRatioCalculator = createResizeRatioCalculator()
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
@@ -42,6 +42,6 @@ export async function initComponents(): Promise<AppComponents> {
     storages,
     assetConverter,
     assetRetriever,
-    assetAnalyzer
+    resizeRatioCalculator
   }
 }
