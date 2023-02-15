@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apt-get update
 RUN apt-get -y -qq install make build-essential git
 
-RUN git clone https://github.com/BinomialLLC/crunch.git
+RUN git clone https://github.com/decentraland/crunch.git
 RUN ls && cd crunch/crnlib && make
 
 # This step builds the whole environment needed to run the service
