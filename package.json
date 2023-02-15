@@ -5,16 +5,18 @@
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
     "test": "jest --forceExit --detectOpenHandles --verbose --passWithNoTests",
     "test:coverage": "jest --forceExit --detectOpenHandles --coverage --verbose --passWithNoTests",
-    "lint:check": "eslint '**/*.{js,ts}'",
+    "lint:check": "NODE_OPTIONS=--max-old-space-size=4096 eslint '**/*.{js,ts}'",
     "lint:fix": "eslint '**/*.{js,ts}' --fix"
   },
   "devDependencies": {
     "@dcl/eslint-config": "^1.1.0",
     "@sinonjs/fake-timers": "6",
     "@types/mock-aws-s3": "^2.6.3",
+    "@types/mock-fs": "^4.13.1",
     "@types/node": "^18.7.13",
     "@well-known-components/test-helpers": "^1.4.0",
     "eslint-config-prettier": "^8.6.0",
+    "mock-aws-s3": "^4.0.2",
     "typescript": "^4.8.3"
   },
   "prettier": {
@@ -23,13 +25,11 @@
   },
   "dependencies": {
     "@dcl/catalyst-storage": "^2.0.3",
-    "@dcl/cdn-uploader": "^1.4.0",
     "@well-known-components/env-config-provider": "^1.1.1",
     "@well-known-components/http-server": "^1.1.6-20220927190058.commit-2dfb235",
     "@well-known-components/interfaces": "^1.1.2",
     "@well-known-components/logger": "^3.0.0",
     "@well-known-components/metrics": "^2.0.1-20220909150423.commit-8f7e5bc",
-    "aws-sdk": "^2.1311.0",
-    "mock-aws-s3": "^4.0.2"
+    "aws-sdk": "^2.1311.0"
   }
 }

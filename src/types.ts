@@ -1,4 +1,3 @@
-import { IContentStorageComponent } from '@dcl/catalyst-storage'
 import type { IFetchComponent } from '@well-known-components/http-server'
 import type {
   IBaseComponent,
@@ -10,7 +9,8 @@ import type {
 import { metricDeclarations } from './metrics'
 import IFileSystem from './ports/IFileSystem'
 import { IAssetConverter } from './types/asset-converter'
-import { S3 } from 'aws-sdk'
+import ICDNBucket from './ports/ICDNBucket'
+import { IAssetRetriever } from './types/assetRetriever'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -23,10 +23,9 @@ export type BaseComponents = {
   server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  storages: { local: IFileSystem; bucket: any }
+  storages: { local: IFileSystem; bucket: ICDNBucket }
   assetConverter: IAssetConverter
-  assetRetriever: (hash: string) => Promise<ArrayBuffer>
-  cdnS3: S3
+  assetRetriever: IAssetRetriever
 }
 
 // components used in runtime

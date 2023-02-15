@@ -1,84 +1,66 @@
-import { ILoggerComponent } from '@well-known-components/interfaces'
 import { HandlerContextWithPath } from '../../types'
 
-const silentError = (logger: ILoggerComponent.ILogger, nameOfAction: string) => (error: Error) => {
-  logger.error('Process failed while ' + nameOfAction, { error: error.message })
+// check using bit representation
+function isPowerOfTwo(length: number): boolean {
+  return length >= 128 && length <= 2048 && (length & (length - 1)) === 0
 }
 
-export async function resizeHandler(
-  context: HandlerContextWithPath<
-    'storages' | 'assetConverter' | 'assetRetriever' | 'config' | 'logs' | 'cdnS3',
-    '/content/:hash/dxt/:length'
-  >
-) {
-  const {
-    components: { storages, assetConverter, assetRetriever, config, logs, cdnS3 },
-    params
-  } = context
+export async function resizeHandler({
+  params,
+  components: { storages, assetConverter, assetRetriever, logs }
+}: Pick<HandlerContextWithPath<'storages' | 'assetConverter' | 'assetRetriever' | 'logs'>, 'components' | 'params'>) {
   const logger = logs.getLogger('resize-handler')
 
-  const { hash: assetHash, length: lengthRequired } = params
+  logger.info('Processing with', { hash: params.hash, length: params.length })
 
-  if (!assetHash || !lengthRequired || isNaN(Number(lengthRequired))) return { status: 400 }
+  if (!params.hash || !params.length || isNaN(Number(params.length)) || !isPowerOfTwo(params.length)) {
+    return {
+      status: 400,
+      body: {
+        message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      }
+    }
+  }
 
-  logger.info('Processing with', { assetHash, lengthRequired })
-
-  const originalAssetName = `${assetHash}.png`
-  const convertedAssetName = `${assetHash}.crn`
-  const assetToUploadName = `${assetHash}-${lengthRequired}.crn`
+  const originalAssetName = `${params.hash}.png`
+  const convertedAssetName = `${params.hash}.crn`
+  const assetToUploadName = `${params.hash}-${params.length}.crn`
 
   try {
-    const asset: ArrayBuffer = await assetRetriever(assetHash)
+    const asset: ArrayBuffer = await assetRetriever.getAsset(params.hash)
 
     if (!asset) {
-      return { status: 404 }
+      return {
+        status: 404,
+        body: {
+          message: `Asset with hash ${params.hash} could not be found.`
+        }
+      }
     }
 
     const fileToConvert = await storages.local.saveFile(originalAssetName, asset)
 
-    const conversionProcesss = assetConverter.convert(fileToConvert, {
+    const conversionResult = await assetConverter.convert(fileToConvert, {
       fileFormat: 'crn',
-      size: Number(lengthRequired),
+      size: Number(params.length),
       out: convertedAssetName
     })
 
-    conversionProcesss.onError((data: Buffer) => {
-      logger.error('Conversion process failed', { data: data.toString() })
-    })
-
-    const conversionResult: { code: number; failed: boolean } = await new Promise((resolve) => {
-      conversionProcesss.onEnd((code: number) => {
-        logger.info('Process finished', { code })
-        resolve({ code, failed: code != 0 })
-      })
-    })
-
-    await storages.local.deleteFile(originalAssetName).catch(silentError(logger, 'deleting ' + originalAssetName))
-
     if (conversionResult.failed) {
-      return { status: 400 }
+      return { status: 400, body: { message: 'Conversion process failed.' } }
     }
 
-    const bucket = await config.getString('BUCKET')
-    await cdnS3
-      .upload({
-        Bucket: bucket as string,
-        Key: assetToUploadName,
-        Body: storages.local.asReadable(convertedAssetName),
-        CacheControl: 'max-age=3600,s-maxage=3600',
-        ACL: 'public-read'
-      })
-      .promise()
+    const assetURL = await storages.bucket.upload(assetToUploadName, storages.local.asReadable(convertedAssetName))
 
-    await storages.local.deleteFile(convertedAssetName).catch(silentError(logger, 'deleting ' + convertedAssetName))
+    await storages.local.deleteFile(originalAssetName, { withSilentFail: true })
+    await storages.local.deleteFile(convertedAssetName, { withSilentFail: true })
 
     return {
-      body: { asset: `${await config.getString('BUCKET_DOMAIN')}${assetToUploadName}` }
+      status: 200,
+      body: { asset: assetURL }
     }
   } catch (error: any) {
     logger.error('Process failed', { error: error.message })
-    logger.debug('Detailed error', { errorDetails: error.toString() })
-
-    return { status: 400 }
+    return { status: 400, body: { message: 'Process failed.' } }
   }
 }

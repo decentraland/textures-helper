@@ -1,8 +1,7 @@
-import ICommandTrigger from '../ports/ICommandTrigger'
-import { CrunchConversionOptions, IAssetConverter } from '../types/asset-converter'
-import ProcessWrapper from '../types/processWrapper'
+import ICommandLine from '../ports/ICommandTrigger'
+import { ConversionResult, CrunchConversionOptions, IAssetConverter } from '../types/asset-converter'
 
-export default function createAssetConverter(commandTrigger: ICommandTrigger): IAssetConverter {
+export default function createAssetConverter(commandTrigger: ICommandLine): IAssetConverter {
   function getArguments(filePath: string, options: CrunchConversionOptions): string[] {
     const args: string[] = []
     args.push('-outsamedir')
@@ -21,9 +20,9 @@ export default function createAssetConverter(commandTrigger: ICommandTrigger): I
     return args
   }
 
-  function convert(fileToConvert: string, options: CrunchConversionOptions): ProcessWrapper {
+  async function convert(fileToConvert: string, options: CrunchConversionOptions): Promise<ConversionResult> {
     const args = getArguments(fileToConvert, options)
-    return commandTrigger.execute('crunch', args)
+    return await commandTrigger.execute('crunch', args)
   }
 
   return { convert }

@@ -1,13 +1,15 @@
-import { createFetchComponent } from '../adapters/fetch'
+import { IAssetRetriever } from '../types/assetRetriever'
+import { AppComponents } from './../types'
 
-export default async function createAssetRetriever(
-  contentHost: string
-): Promise<(hash: string) => Promise<ArrayBuffer>> {
-  const fetcher = await createFetchComponent()
+export default async function createAssetRetriever({
+  config,
+  fetch
+}: Pick<AppComponents, 'config' | 'fetch'>): Promise<IAssetRetriever> {
+  const contentHost = (await config.getString('CONTENT_URL')) || ''
 
-  const getAsset = async (hash: string): Promise<ArrayBuffer> => {
-    return await (await fetcher.fetch(`${contentHost}/contents/${hash}`)).arrayBuffer()
+  async function getAsset(hash: string): Promise<ArrayBuffer> {
+    return await (await fetch.fetch(`${contentHost}/contents/${hash}`)).arrayBuffer()
   }
 
-  return getAsset
+  return { getAsset }
 }

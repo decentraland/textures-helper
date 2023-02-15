@@ -6,6 +6,9 @@ import { createLocalFetchCompoment, createRunner } from '@well-known-components/
 import { initComponents as originalInitComponents } from '../src/components'
 import { main } from '../src/service'
 import { TestComponents } from '../src/types'
+import { createLogComponentMock } from './mocks/loggerMock'
+import { createFileSystemMock } from './mocks/fileSystemMock'
+import { createCDNBucketMock } from './mocks/cdnBucketMock'
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -26,6 +29,11 @@ async function initComponents(): Promise<TestComponents> {
 
   return {
     ...components,
-    localFetch: await createLocalFetchCompoment(config)
+    localFetch: await createLocalFetchCompoment(config),
+    logs: createLogComponentMock(),
+    storages: {
+      local: createFileSystemMock(),
+      bucket: createCDNBucketMock()
+    }
   }
 }

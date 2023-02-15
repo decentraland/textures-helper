@@ -2,18 +2,14 @@ import { createDotEnvConfigComponent } from '@well-known-components/env-config-p
 import { createServerComponent, createStatusCheckComponent } from '@well-known-components/http-server'
 import { createLogComponent } from '@well-known-components/logger'
 import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-known-components/metrics'
-import * as os from 'os'
 import { createFetchComponent } from './adapters/fetch'
-import { createFileManager } from './adapters/fileSystem'
+import { createFileSystemAdapter } from './adapters/fileSystem'
 import createAssetConverter from './logic/asset-converter'
 import createAssetRetriever from './logic/assetRetriever'
 import { metricDeclarations } from './metrics'
 import { AppComponents, GlobalContext } from './types'
-import createCommandTrigger from './adapters/commandLine'
-import { uploadDir } from '@dcl/cdn-uploader'
-
-import * as AWS from 'aws-sdk'
-import * as MockAws from 'mock-aws-s3'
+import createCommandLineAdapter from './adapters/commandLine'
+import { createCDNBucket } from './adapters/cdnBucket'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -24,19 +20,13 @@ export async function initComponents(): Promise<AppComponents> {
   const statusChecks = await createStatusCheckComponent({ server, config })
   const fetch = await createFetchComponent()
 
-  const storageDirectory = (await config.getString('STORAGE_DIRECTORY')) || `${os.tmpdir()}`
-
-  const s3Bucket = await config.getString('BUCKET')
-  const cdnS3 = s3Bucket ? new AWS.S3({}) : new MockAws.S3({})
-  const bucketStorage = uploadDir
-
   const storages = {
-    local: createFileManager(storageDirectory),
-    bucket: bucketStorage
+    local: await createFileSystemAdapter({ logs, config }),
+    bucket: await createCDNBucket({ config })
   }
 
-  const assetConverter = createAssetConverter(createCommandTrigger())
-  const assetRetriever = await createAssetRetriever((await config.getString('CONTENT_URL')) || '')
+  const assetConverter = createAssetConverter(await createCommandLineAdapter({ logs }))
+  const assetRetriever = await createAssetRetriever({ config, fetch })
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
@@ -49,7 +39,6 @@ export async function initComponents(): Promise<AppComponents> {
     metrics,
     storages,
     assetConverter,
-    assetRetriever,
-    cdnS3
+    assetRetriever
   }
 }

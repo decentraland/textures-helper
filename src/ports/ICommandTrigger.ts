@@ -1,5 +1,5 @@
-import ProcessWrapper from '../types/processWrapper'
+import { ConversionResult } from '../types/asset-converter'
 
-export default interface ICommandTrigger {
-  execute(command: string, args: string[]): ProcessWrapper
+export default interface ICommandLine {
+  execute(command: string, args: string[]): Promise<ConversionResult>
 }

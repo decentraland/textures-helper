@@ -1,4 +1,7 @@
-import ProcessWrapper from './processWrapper'
+export type ConversionResult = {
+  code: number
+  failed: boolean
+}
 
 export type CrunchConversionOptions = {
   fileFormat: string
@@ -7,5 +10,5 @@ export type CrunchConversionOptions = {
 }
 
 export interface IAssetConverter {
-  convert: (fileToConvert: string, options: CrunchConversionOptions) => ProcessWrapper
+  convert: (fileToConvert: string, options: CrunchConversionOptions) => Promise<ConversionResult>
 }
