@@ -10,7 +10,8 @@ import { metricDeclarations } from './metrics'
 import IFileSystem from './ports/IFileSystem'
 import { IAssetConverter } from './types/asset-converter'
 import ICDNBucket from './ports/ICDNBucket'
-import { IAssetRetriever } from './types/assetRetriever'
+import { IAssetRetriever } from './types/asset-retriever'
+import { IResizeRatioCalculator } from './types/resize-ratio-calculator'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -26,6 +27,7 @@ export type BaseComponents = {
   storages: { local: IFileSystem; bucket: ICDNBucket }
   assetConverter: IAssetConverter
   assetRetriever: IAssetRetriever
+  resizeRatioCalculator: IResizeRatioCalculator
 }
 
 // components used in runtime
