@@ -1,5 +1,5 @@
 import { HandlerContextWithPath } from '../../types'
-import { ResizeRatio } from '../../types/asset-analyzer'
+import { ResizeRatio } from '../../types/resize-ratio-calculator'
 import { ConversionResult } from '../../types/asset-converter'
 
 // check using bit representation

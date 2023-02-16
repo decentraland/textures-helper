@@ -10,8 +10,8 @@ import { metricDeclarations } from './metrics'
 import IFileSystem from './ports/IFileSystem'
 import { IAssetConverter } from './types/asset-converter'
 import ICDNBucket from './ports/ICDNBucket'
-import { IAssetRetriever } from './types/assetRetriever'
-import { IResizeRatioCalculator } from './types/asset-analyzer'
+import { IAssetRetriever } from './types/asset-retriever'
+import { IResizeRatioCalculator } from './types/resize-ratio-calculator'
 
 export type GlobalContext = {
   components: BaseComponents

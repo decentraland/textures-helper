@@ -4,13 +4,13 @@ import { createLogComponent } from '@well-known-components/logger'
 import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-known-components/metrics'
 import { createFetchComponent } from './adapters/fetch'
 import { createFileSystemAdapter } from './adapters/fileSystem'
-import createAssetConverter from './logic/assetConverter'
-import createAssetRetriever from './logic/assetRetriever'
+import createAssetConverter from './logic/asset-converter'
+import createAssetRetriever from './logic/asset-retriever'
 import { metricDeclarations } from './metrics'
 import { AppComponents, GlobalContext } from './types'
 import createCommandLineAdapter from './adapters/commandLine'
 import { createCDNBucket } from './adapters/cdnBucket'
-import createResizeRatioCalculator from './logic/resizeRatioCalculator'
+import createResizeRatioCalculator from './logic/resize-ratio-calculator'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {

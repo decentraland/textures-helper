@@ -1,5 +1,5 @@
-import { IAssetRetriever } from '../types/assetRetriever'
-import { AppComponents } from './../types'
+import { IAssetRetriever } from '../types/asset-retriever'
+import { AppComponents } from '../types'
 
 export default async function createAssetRetriever({
   config,

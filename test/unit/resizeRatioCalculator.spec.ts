@@ -1,5 +1,5 @@
-import { IResizeRatioCalculator } from '../../src/types/asset-analyzer'
-import createResizeRatioCalculator from '../../src/logic/resizeRatioCalculator'
+import { IResizeRatioCalculator } from '../../src/types/resize-ratio-calculator'
+import createResizeRatioCalculator from '../../src/logic/resize-ratio-calculator'
 import { PNG } from 'pngjs'
 
 describe('resizeRatioCalculator', () => {

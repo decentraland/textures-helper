@@ -1,4 +1,4 @@
-import { ResizeRatio, IResizeRatioCalculator } from '../types/asset-analyzer'
+import { ResizeRatio, IResizeRatioCalculator } from '../types/resize-ratio-calculator'
 import sizeOf from 'image-size'
 
 export default function createResizeRatioCalculator(): IResizeRatioCalculator {
