@@ -1,24 +1,48 @@
 import { HandlerContextWithPath } from '../../types'
 import { ResizeRatio } from '../../types/resize-ratio-calculator'
 import { ConversionResult } from '../../types/asset-converter'
+import { DecentralandSignatureContext } from 'decentraland-crypto-middleware/lib/types'
 
 // check using bit representation
 function isPowerOfTwo(length: number): boolean {
   return length >= 128 && length <= 2048 && (length & (length - 1)) === 0
 }
 
-export async function resizeHandler({
-  params,
-  components: { storages, logs, assetConverter, assetRetriever, resizeRatioCalculator }
-}: Pick<
-  HandlerContextWithPath<'storages' | 'logs' | 'assetConverter' | 'assetRetriever' | 'resizeRatioCalculator'>,
-  'components' | 'params'
->) {
+function areNotValid(pathParameters: { hash: string; length: string }): boolean {
+  const lengthAsNumber = Number(pathParameters.length)
+  return !pathParameters.hash || !pathParameters.length || isNaN(lengthAsNumber) || !isPowerOfTwo(lengthAsNumber)
+}
+
+function isMissing(metadata: Record<string, any>): boolean {
+  return metadata.signer !== 'dcl:explorer' || metadata.intent !== 'dcl:explorer:resize-textures'
+}
+
+export async function resizeHandler(
+  context: HandlerContextWithPath<
+    'storages' | 'logs' | 'assetConverter' | 'assetRetriever' | 'resizeRatioCalculator',
+    '/content/:hash/dxt/:length'
+  > &
+    DecentralandSignatureContext<any>
+) {
+  const {
+    components: { storages, logs, assetConverter, assetRetriever, resizeRatioCalculator },
+    params
+  } = context
+
   const logger = logs.getLogger('resize-handler')
 
   logger.info('Processing with', { hash: params.hash, length: params.length })
 
-  if (!params.hash || !params.length || isNaN(Number(params.length)) || !isPowerOfTwo(params.length)) {
+  if (isMissing(context.verification!.authMetadata)) {
+    return {
+      status: 400,
+      body: {
+        message: 'Access denied, invalid metadata.'
+      }
+    }
+  }
+
+  if (areNotValid(params)) {
     return {
       status: 400,
       body: {
@@ -43,7 +67,7 @@ export async function resizeHandler({
       }
     }
 
-    const resizeRatio: ResizeRatio = resizeRatioCalculator.calculate(asset, params.length)
+    const resizeRatio: ResizeRatio = resizeRatioCalculator.calculate(asset, Number(params.length))
     const fileToConvert: string = await storages.local.saveFile(originalAssetName, asset)
 
     const conversionResult: ConversionResult = await assetConverter.convert(fileToConvert, {
