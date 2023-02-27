@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 import ICommandLine from '../ports/ICommandTrigger'
-import { AppComponents } from './../types'
+import { AppComponents } from '../types'
 import { ConversionResult } from '../types/asset-converter'
 
 export default async function createCommandLineAdapter({ logs }: Pick<AppComponents, 'logs'>): Promise<ICommandLine> {
