@@ -60,7 +60,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
@@ -74,7 +74,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
@@ -88,7 +88,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
@@ -102,23 +102,51 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
-  it('fails when asset is not found by the hash provided', async () => {
+  it('fails when asset value is not specified', async () => {
     const { localFetch } = components
 
-    const hash = 'aHash'
+    const path = '/content/dxt/128'
+    const request = await getSignedFetchRequest(path)
+
+    const r = await localFetch.fetch(path + '?asset=', request)
+
+    expect(r.status).toEqual(400)
+    expect(await r.json()).toEqual({
+      message: 'The query string parameter asset is required. Asset must be a valid URL aiming to the image to convert.'
+    })
+  })
+
+  it('fails when asset parameter is not specified', async () => {
+    const { localFetch } = components
+
+    const path = '/content/dxt/128'
+    const request = await getSignedFetchRequest(path)
+
+    const r = await localFetch.fetch(path, request)
+
+    expect(r.status).toEqual(400)
+    expect(await r.json()).toEqual({
+      message: 'The query string parameter asset is required. Asset must be a valid URL aiming to the image to convert.'
+    })
+  })
+
+  it('fails when asset is not found by the URL provided', async () => {
+    const { localFetch } = components
+
+    const assetUrl = 'aHash'
     const path = `/content/dxt/128`
     const request = await getSignedFetchRequest(path)
     spyComponents.assetRetriever.get.mockResolvedValueOnce(undefined)
 
-    const r = await localFetch.fetch(path + `?asset=${hash}`, request)
+    const r = await localFetch.fetch(path + `?asset=${assetUrl}`, request)
 
     expect(r.status).toBe(404)
     expect(await r.json()).toEqual({
-      message: `Asset on ${hash} could not be downloaded.`
+      message: `Asset on ${assetUrl} could not be downloaded.`
     })
   })
 })

@@ -10,7 +10,7 @@ function isPowerOfTwo(length: number): boolean {
   return length >= 128 && length <= 2048 && (length & (length - 1)) === 0
 }
 
-function areNotValid(pathParameters: { length: string }): boolean {
+function areInvalid(pathParameters: { length: string }): boolean {
   const lengthAsNumber = Number(pathParameters.length)
   return !pathParameters.length || isNaN(lengthAsNumber) || !isPowerOfTwo(lengthAsNumber)
 }
@@ -47,21 +47,21 @@ export async function resizeHandler(
     }
   }
 
-  if (areNotValid(params)) {
+  if (areInvalid(params)) {
     return {
       status: 400,
       body: {
-        message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+        message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
       }
     }
   }
 
-  // TODO: update message error
   if (!assetUrl) {
     return {
       status: 400,
       body: {
-        message: 'TBD'
+        message:
+          'The query string parameter asset is required. Asset must be a valid URL aiming to the image to convert.'
       }
     }
   }
