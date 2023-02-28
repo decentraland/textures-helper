@@ -3,11 +3,11 @@ import { getAuthHeaders, getIdentity } from '../utils'
 import { Authenticator } from '@dcl/crypto'
 import * as fs from 'fs'
 
-test('resize handler /content/:hash/dxt/:length', function ({ components, spyComponents }) {
+test('resize handler /content/dxt/:length?asset', function ({ components, spyComponents }) {
   it('fails when auth chain is missing', async () => {
     const { localFetch } = components
 
-    const path = '/content/dxt/148?asset=aHash'
+    const path = '/content/dxt/148?asset=anAsset'
 
     const r = await localFetch.fetch(path)
 
@@ -23,7 +23,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path, { intent: 'invalid', signer: VALID_CUSTOM_METADATA.signer })
 
-    const r = await localFetch.fetch(path + '?asset=aHash', {
+    const r = await localFetch.fetch(path + '?asset=anAsset', {
       ...request,
       headers: { ...request.headers, metadata: { ...request.headers.metadata, intent: 'invalid' } }
     })
@@ -40,7 +40,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path, { intent: VALID_CUSTOM_METADATA.intent, signer: 'invalid' })
 
-    const r = await localFetch.fetch(path + '?asset=aHash', {
+    const r = await localFetch.fetch(path + '?asset=anAsset', {
       ...request,
       headers: { ...request.headers, metadata: { ...request.headers.metadata, intent: 'invalid' } }
     })
@@ -57,7 +57,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const path = '/content/dxt/201'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path + '?asset=aHash', request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -71,7 +71,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const path = '/content/dxt/length'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path + '?asset=aHash', request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -85,7 +85,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const path = '/content/dxt/4096'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path + '?asset=aHash', request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -99,7 +99,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const path = '/content/dxt/64'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path + '?asset=aHash', request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -138,7 +138,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when asset is not found by the URL provided', async () => {
     const { localFetch } = components
 
-    const assetUrl = 'aHash'
+    const assetUrl = 'anAsset'
     const path = `/content/dxt/128`
     const request = await getSignedFetchRequest(path)
     spyComponents.assetRetriever.get.mockResolvedValueOnce(undefined)
@@ -157,7 +157,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const fileBuffer = fs.readFileSync(__filename)
     const notImageFile = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)
 
-    const assetUrl = 'aHash'
+    const assetUrl = 'anAsset'
     const path = `/content/dxt/128`
     const request = await getSignedFetchRequest(path)
     spyComponents.assetRetriever.get.mockResolvedValueOnce(notImageFile)
