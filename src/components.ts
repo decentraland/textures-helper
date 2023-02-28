@@ -27,7 +27,7 @@ export async function initComponents(): Promise<AppComponents> {
   }
 
   const assetConverter = createAssetConverter(await createCommandLineAdapter({ logs }))
-  const assetRetriever = await createAssetRetriever({ config, fetch })
+  const assetRetriever = await createAssetRetriever({ fetch })
   const resizeRatioCalculator = createResizeRatioCalculator()
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })

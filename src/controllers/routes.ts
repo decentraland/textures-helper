@@ -7,8 +7,8 @@ import { wellKnownComponents } from 'decentraland-crypto-middleware'
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
   const router = new Router<GlobalContext>()
 
-  router.use('/content/:hash/dxt/:length', wellKnownComponents({}))
-  router.get('/content/:hash/dxt/:length', resizeHandler)
+  router.use('/content/dxt/:length', wellKnownComponents({}))
+  router.get('/content/dxt/:length', resizeHandler)
 
   return router
 }

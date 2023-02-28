@@ -3,14 +3,16 @@ import { ResizeRatio } from '../../types/resize-ratio-calculator'
 import { ConversionResult } from '../../types/asset-converter'
 import { DecentralandSignatureContext } from 'decentraland-crypto-middleware/lib/types'
 
+import { createHash } from 'crypto'
+
 // check using bit representation
 function isPowerOfTwo(length: number): boolean {
   return length >= 128 && length <= 2048 && (length & (length - 1)) === 0
 }
 
-function areNotValid(pathParameters: { hash: string; length: string }): boolean {
+function areNotValid(pathParameters: { length: string }): boolean {
   const lengthAsNumber = Number(pathParameters.length)
-  return !pathParameters.hash || !pathParameters.length || isNaN(lengthAsNumber) || !isPowerOfTwo(lengthAsNumber)
+  return !pathParameters.length || isNaN(lengthAsNumber) || !isPowerOfTwo(lengthAsNumber)
 }
 
 function isMissing(metadata: Record<string, any>): boolean {
@@ -20,18 +22,21 @@ function isMissing(metadata: Record<string, any>): boolean {
 export async function resizeHandler(
   context: HandlerContextWithPath<
     'storages' | 'logs' | 'assetConverter' | 'assetRetriever' | 'resizeRatioCalculator',
-    '/content/:hash/dxt/:length'
+    '/content/dxt/:length'
   > &
     DecentralandSignatureContext<any>
 ) {
   const {
     components: { storages, logs, assetConverter, assetRetriever, resizeRatioCalculator },
-    params
+    params,
+    url
   } = context
 
   const logger = logs.getLogger('resize-handler')
 
-  logger.info('Processing with', { hash: params.hash, length: params.length })
+  const assetUrl = url.searchParams.get('asset')
+
+  logger.info('Processing with', { asset: assetUrl || '', length: params.length })
 
   if (isMissing(context.verification!.authMetadata)) {
     return {
@@ -51,22 +56,36 @@ export async function resizeHandler(
     }
   }
 
-  const originalAssetName = `${params.hash}.png`
-  const convertedAssetName = `${params.hash}.crn`
-  const assetToUploadName = `${params.hash}-${params.length}.crn`
+  // TODO: update message error
+  if (!assetUrl) {
+    return {
+      status: 400,
+      body: {
+        message: 'TBD'
+      }
+    }
+  }
 
   try {
-    const asset: ArrayBuffer = await assetRetriever.getAsset(params.hash)
+    const asset: ArrayBuffer = await assetRetriever.get(assetUrl)
 
     if (!asset || !asset.byteLength) {
       return {
         status: 404,
         body: {
-          message: `Asset with hash ${params.hash} could not be found.`
+          message: `Asset on ${assetUrl} could not be downloaded.`
         }
       }
     }
 
+    const hashFromUrl = createHash('sha256').update(assetUrl).digest('hex')
+    const assetName = hashFromUrl.substring(0, 10)
+
+    const originalAssetName = `${assetName}.png`
+    const convertedAssetName = `${assetName}.crn`
+    const assetToUploadName = `${params.length}-${assetName}.crn`
+
+    // in case the asset is not an image, fails with: Error: Invalid image buffer
     const resizeRatio: ResizeRatio = resizeRatioCalculator.calculate(asset, Number(params.length))
     const fileToConvert: string = await storages.local.saveFile(originalAssetName, asset)
 

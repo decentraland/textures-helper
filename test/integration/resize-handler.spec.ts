@@ -6,7 +6,7 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when auth chain is missing', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/148'
+    const path = '/content/dxt/148?asset=aHash'
 
     const r = await localFetch.fetch(path)
 
@@ -19,10 +19,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when auth chain is present but metadata.intent is invalid', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/128'
+    const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path, { intent: 'invalid', signer: VALID_CUSTOM_METADATA.signer })
 
-    const r = await localFetch.fetch(path, {
+    const r = await localFetch.fetch(path + '?asset=aHash', {
       ...request,
       headers: { ...request.headers, metadata: { ...request.headers.metadata, intent: 'invalid' } }
     })
@@ -36,10 +36,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when auth chain is present but metadata.signer is invalid', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/128'
+    const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path, { intent: VALID_CUSTOM_METADATA.intent, signer: 'invalid' })
 
-    const r = await localFetch.fetch(path, {
+    const r = await localFetch.fetch(path + '?asset=aHash', {
       ...request,
       headers: { ...request.headers, metadata: { ...request.headers.metadata, intent: 'invalid' } }
     })
@@ -53,10 +53,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when length sent is not a power of two', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/201'
+    const path = '/content/dxt/201'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=aHash', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -67,10 +67,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when length is not a number', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/length'
+    const path = '/content/dxt/length'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=aHash', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -81,10 +81,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when length is greater than 2048', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/4096'
+    const path = '/content/dxt/4096'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=aHash', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -95,10 +95,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when length is less than 128', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/64'
+    const path = '/content/dxt/64'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=aHash', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
@@ -110,15 +110,15 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     const { localFetch } = components
 
     const hash = 'aHash'
-    const path = `/content/${hash}/dxt/128`
+    const path = `/content/dxt/128`
     const request = await getSignedFetchRequest(path)
-    spyComponents.assetRetriever.getAsset.mockResolvedValueOnce(undefined)
+    spyComponents.assetRetriever.get.mockResolvedValueOnce(undefined)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + `?asset=${hash}`, request)
 
     expect(r.status).toBe(404)
     expect(await r.json()).toEqual({
-      message: `Asset with hash ${hash} could not be found.`
+      message: `Asset on ${hash} could not be downloaded.`
     })
   })
 })
