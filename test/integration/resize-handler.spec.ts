@@ -1,6 +1,7 @@
 import { test } from '../components'
 import { getAuthHeaders, getIdentity } from '../utils'
 import { Authenticator } from '@dcl/crypto'
+import * as fs from 'fs'
 
 test('resize handler /content/:hash/dxt/:length', function ({ components, spyComponents }) {
   it('fails when auth chain is missing', async () => {
@@ -147,6 +148,25 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
     expect(r.status).toBe(404)
     expect(await r.json()).toEqual({
       message: `Asset on ${assetUrl} could not be downloaded.`
+    })
+  })
+
+  it('fails when asset provided by the URL is not an image', async () => {
+    const { localFetch } = components
+
+    const fileBuffer = fs.readFileSync(__filename)
+    const notImageFile = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)
+
+    const assetUrl = 'aHash'
+    const path = `/content/dxt/128`
+    const request = await getSignedFetchRequest(path)
+    spyComponents.assetRetriever.get.mockResolvedValueOnce(notImageFile)
+
+    const r = await localFetch.fetch(path + `?asset=${assetUrl}`, request)
+
+    expect(r.status).toBe(400)
+    expect(await r.json()).toEqual({
+      message: `Process failed.`
     })
   })
 })
