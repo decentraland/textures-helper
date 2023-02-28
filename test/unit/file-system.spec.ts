@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { createFileSystemAdapter } from '../../src/adapters/fileSystem'
+import { createFileSystemAdapter } from '../../src/adapters/file-system'
 import IFileSystem from '../../src/ports/IFileSystem'
 import { IConfigComponent } from '@well-known-components/interfaces'
 import { createConfigComponent } from '@well-known-components/env-config-provider'

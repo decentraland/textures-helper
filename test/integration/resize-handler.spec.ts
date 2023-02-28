@@ -1,12 +1,13 @@
 import { test } from '../components'
 import { getAuthHeaders, getIdentity } from '../utils'
 import { Authenticator } from '@dcl/crypto'
+import * as fs from 'fs'
 
-test('resize handler /content/:hash/dxt/:length', function ({ components, spyComponents }) {
+test('resize handler /content/dxt/:length?asset', function ({ components, spyComponents }) {
   it('fails when auth chain is missing', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/148'
+    const path = '/content/dxt/148?asset=anAsset'
 
     const r = await localFetch.fetch(path)
 
@@ -19,10 +20,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when auth chain is present but metadata.intent is invalid', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/128'
+    const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path, { intent: 'invalid', signer: VALID_CUSTOM_METADATA.signer })
 
-    const r = await localFetch.fetch(path, {
+    const r = await localFetch.fetch(path + '?asset=anAsset', {
       ...request,
       headers: { ...request.headers, metadata: { ...request.headers.metadata, intent: 'invalid' } }
     })
@@ -36,10 +37,10 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when auth chain is present but metadata.signer is invalid', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/128'
+    const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path, { intent: VALID_CUSTOM_METADATA.intent, signer: 'invalid' })
 
-    const r = await localFetch.fetch(path, {
+    const r = await localFetch.fetch(path + '?asset=anAsset', {
       ...request,
       headers: { ...request.headers, metadata: { ...request.headers.metadata, intent: 'invalid' } }
     })
@@ -53,72 +54,119 @@ test('resize handler /content/:hash/dxt/:length', function ({ components, spyCom
   it('fails when length sent is not a power of two', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/201'
+    const path = '/content/dxt/201'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
   it('fails when length is not a number', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/length'
+    const path = '/content/dxt/length'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
   it('fails when length is greater than 2048', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/4096'
+    const path = '/content/dxt/4096'
     const request = await getSignedFetchRequest(path)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
     })
   })
 
   it('fails when length is less than 128', async () => {
     const { localFetch } = components
 
-    const path = '/content/aHash/dxt/64'
+    const path = '/content/dxt/64'
+    const request = await getSignedFetchRequest(path)
+
+    const r = await localFetch.fetch(path + '?asset=anAsset', request)
+
+    expect(r.status).toEqual(400)
+    expect(await r.json()).toEqual({
+      message: 'The path parameter length is required. Length must be a power of two between 128 and 2048.'
+    })
+  })
+
+  it('fails when asset value is not specified', async () => {
+    const { localFetch } = components
+
+    const path = '/content/dxt/128'
+    const request = await getSignedFetchRequest(path)
+
+    const r = await localFetch.fetch(path + '?asset=', request)
+
+    expect(r.status).toEqual(400)
+    expect(await r.json()).toEqual({
+      message: 'The query string parameter asset is required. Asset must be a valid URL aiming to the image to convert.'
+    })
+  })
+
+  it('fails when asset parameter is not specified', async () => {
+    const { localFetch } = components
+
+    const path = '/content/dxt/128'
     const request = await getSignedFetchRequest(path)
 
     const r = await localFetch.fetch(path, request)
 
     expect(r.status).toEqual(400)
     expect(await r.json()).toEqual({
-      message: 'The parameters hash and length are required. Length must be a power of two between 128 and 2048.'
+      message: 'The query string parameter asset is required. Asset must be a valid URL aiming to the image to convert.'
     })
   })
 
-  it('fails when asset is not found by the hash provided', async () => {
+  it('fails when asset is not found by the URL provided', async () => {
     const { localFetch } = components
 
-    const hash = 'aHash'
-    const path = `/content/${hash}/dxt/128`
+    const assetUrl = 'anAsset'
+    const path = `/content/dxt/128`
     const request = await getSignedFetchRequest(path)
-    spyComponents.assetRetriever.getAsset.mockResolvedValueOnce(undefined)
+    spyComponents.assetRetriever.get.mockResolvedValueOnce(undefined)
 
-    const r = await localFetch.fetch(path, request)
+    const r = await localFetch.fetch(path + `?asset=${assetUrl}`, request)
 
     expect(r.status).toBe(404)
     expect(await r.json()).toEqual({
-      message: `Asset with hash ${hash} could not be found.`
+      message: `Asset on ${assetUrl} could not be downloaded.`
+    })
+  })
+
+  it('fails when asset provided by the URL is not an image', async () => {
+    const { localFetch } = components
+
+    const fileBuffer = fs.readFileSync(__filename)
+    const notImageFile = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)
+
+    const assetUrl = 'anAsset'
+    const path = `/content/dxt/128`
+    const request = await getSignedFetchRequest(path)
+    spyComponents.assetRetriever.get.mockResolvedValueOnce(notImageFile)
+
+    const r = await localFetch.fetch(path + `?asset=${assetUrl}`, request)
+
+    expect(r.status).toBe(400)
+    expect(await r.json()).toEqual({
+      message: `Process failed.`
     })
   })
 })

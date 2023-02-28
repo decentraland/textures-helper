@@ -1,7 +1,7 @@
 import { promises as fs, createReadStream, ReadStream } from 'fs'
 import IFileSystem from '../ports/IFileSystem'
 import * as os from 'os'
-import { AppComponents } from './../types'
+import { AppComponents } from '../types'
 
 export async function createFileSystemAdapter({
   config,

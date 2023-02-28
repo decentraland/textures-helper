@@ -1,3 +1,3 @@
 export interface IAssetRetriever {
-  getAsset: (hash: string) => Promise<ArrayBuffer>
+  get: (hash: string) => Promise<ArrayBuffer>
 }
