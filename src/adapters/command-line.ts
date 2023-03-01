@@ -16,7 +16,7 @@ export default async function createCommandLineAdapter({ logs }: Pick<AppCompone
     return new Promise((resolve) => {
       process.on('close', (code: number) => {
         logger.info('Conversion process finished', { code })
-        resolve({ code, failed: code != 0 })
+        resolve({ code, failed: code !== 0 })
       })
     })
   }
