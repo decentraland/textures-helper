@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@dcl/eslint-config": "^1.1.0",
-    "@sinonjs/fake-timers": "6",
+    "@sinonjs/fake-timers": "10",
     "@types/koa": "^2.13.5",
     "@types/mock-aws-s3": "^2.6.3",
     "@types/mock-fs": "^4.13.1",
