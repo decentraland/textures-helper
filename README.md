@@ -1,50 +1,62 @@
-# template-server
+# Textures Helper
 
-## Architecture
+Textures helper compresses textures using DXT1 mipmapped format.
 
-Extension of "ports and adapters architecture", also known as "hexagonal architecture".
+## Converting an image
 
-With this architecture, code is organized into several layers: logic, controllers, adapters, and components (ports).
+This service exposes an endpoint for compressing textures which expects two inputs `size` as a path parameter and `asset` as a query parameter. The call structure for this endpoint is as follows:
 
-## Application lifecycle
+```
+GET <HOST>/content/dxt/:LENGTH?asset=<ASSET-URL>
+```
 
-1. **Start application lifecycle** - Handled by [src/index.ts](src/index.ts) in only one line of code: `Lifecycle.run({ main, initComponents })`
-2. **Create components** - Handled by [src/components.ts](src/components.ts) in the function `initComponents`
-3. **Wire application & start components** - Handled by [src/service.ts](src/service.ts) in the funciton `main`.
-   1. First wire HTTP routes and other events with [controllers](#src/controllers)
-   2. Then call to `startComponents()` to initialize the components (i.e. http-listener)
+* **length** - must be an integer and a power of two that can go from 128 until 2048
+* **asset** - must be a HTTP url referencing the asset to be converted by the service
 
-The same lifecycle is also valid for tests: [test/components.ts](test/components.ts)
+The response structure will look like:
 
-## Namespaces
-
-### src/logic
-
-Deals with pure business logic and shouldn't have side-effects or throw exceptions.
-
-### src/controllers
-
-The "glue" between all the other layers, orchestrating calls between pure business logic and adapters.
-
-Controllers always receive an hydrated context containing components and parameters to call the business logic e.g:
-
-```ts
-// handler for /ping
-export async function pingHandler(context: {
-  url: URL // parameter added by http-server
-  components: AppComponents // components of the app, part of the global context
-}) {
-  components.metrics.increment("test_ping_counter")
-  return { status: 200 }
+```
+{
+  "asset": string,
+  "conversionRatio":
+    {
+      "height": number,
+      "width": number
+     }
 }
 ```
 
-### src/adapters
+* **asset** - contains the URL of the resized and compressed asset. This URL will point to the CDN configured for this service.
+* **conversionRatio** - contains the resize ratio relating old asset size with the new one specified when calling the endpoint
+  * **height** - newHeight / oldHeight (_fixed to four decimals_)
+  * **width** - newWidth / oldWidth (_fixed to four decimals_)
 
-The layer that converts external data representations into internal ones, and vice-versa. Acts as buffer to protect the service from changes in the outside world; when a data representation changes, you only need to change how the adapters deal with it.
+### Endpoint call example
 
-### src/components.ts
+The following call will compress the textures of the asset `bafkreieyj5es7j3mvdyyvvjn3qc3uaotlpsmhjb34rqoumsxpv5fbxieq4` to `CRN` format using `DXT1` and resize the image to the specified size (_512_).
 
-We use the components abstraction to organize our adapters (e.g. HTTP client, database client, redis client) and any other logic that needs to track mutable state or encode dependencies between stateful components. For every environment (e.g. test, e2e, prod, staging...) we have a different version of our component systems, enabling us to easily inject mocks or different implementations for different contexts.
+```
+GET https://textures-helper.decentraland.zone/content/dxt/512?asset=https://peer-ap1.decentraland.zone/content/contents/bafkreieyj5es7j3mvdyyvvjn3qc3uaotlpsmhjb34rqoumsxpv5fbxieq4
+```
 
-We make components available to incoming http and kafka handlers. For instance, the http-server handlers have access to things like the database or HTTP components, and pass them down to the controller level for general use.
+### Response example
+
+The call above would return the following response:
+
+```json
+{
+  "asset":"https://textures-helper-cdn.decentraland.zone/bafkreieyj5es7j3mvdyyvvjn3qc3uaotlpsmhjb34rqoumsxpv5fbxieq4-512.crn",
+  "conversionRatio":
+    {
+      "height":1,
+      "width":2
+     }
+}
+```
+
+### Authentication
+
+This service is secured with Auth Chain, therefore it needs to be consumed using [Signed Fetch](https://adr.decentraland.org/adr/ADR-44). The `signed fetch` call should include metadata with the following values:
+
+* **signer** - **dcl:explorer**
+* **intent** - **dcl:explorer:resize-textures**
