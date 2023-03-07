@@ -1,7 +1,11 @@
 import ICommandLine from '../ports/ICommandTrigger'
+import { AppComponents } from '../types'
 import { ConversionResult, CrunchConversionOptions, IAssetConverter } from '../types/asset-converter'
 
-export default function createAssetConverter(commandTrigger: ICommandLine): IAssetConverter {
+export default function createAssetConverter(
+  { metrics }: Pick<AppComponents, 'metrics'>,
+  commandTrigger: ICommandLine
+): IAssetConverter {
   function getArguments(filePath: string, options: CrunchConversionOptions): string[] {
     const args: string[] = []
     args.push('-outsamedir')
@@ -22,7 +26,15 @@ export default function createAssetConverter(commandTrigger: ICommandLine): IAss
 
   async function convert(fileToConvert: string, options: CrunchConversionOptions): Promise<ConversionResult> {
     const args = getArguments(fileToConvert, options)
-    return await commandTrigger.execute('crunch', args)
+
+    const metricLabels = { size: Number(options.size) }
+    const metricTimer = metrics.startTimer('conversion_duration_seconds', metricLabels)
+
+    try {
+      return await commandTrigger.execute('crunch', args)
+    } finally {
+      metricTimer.end(metricLabels)
+    }
   }
 
   return { convert }

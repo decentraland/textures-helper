@@ -26,7 +26,7 @@ export async function initComponents(): Promise<AppComponents> {
     bucket: await createCDNBucket({ config })
   }
 
-  const assetConverter = createAssetConverter(await createCommandLineAdapter({ logs }))
+  const assetConverter = createAssetConverter({ metrics }, await createCommandLineAdapter({ logs }))
   const assetRetriever = await createAssetRetriever({ fetch })
   const resizeRatioCalculator = createResizeRatioCalculator()
 

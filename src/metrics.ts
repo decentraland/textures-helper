@@ -5,10 +5,10 @@ import { metricDeclarations as logsMetricsDeclarations } from '@well-known-compo
 export const metricDeclarations = {
   ...getDefaultHttpMetrics(),
   ...logsMetricsDeclarations,
-  test_ping_counter: {
-    help: 'Count calls to ping',
-    type: IMetricsComponent.CounterType,
-    labelNames: ['pathname']
+  conversion_duration_seconds: {
+    help: 'The time (in seconds) it takes for a conversion to be done',
+    type: IMetricsComponent.HistogramType,
+    labelNames: ['size']
   }
 }
 
