@@ -2695,10 +2695,10 @@ debug@^3.2.7:
   dependencies:
     ms "^2.1.1"
 
-decentraland-crypto-middleware@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/decentraland-crypto-middleware/-/decentraland-crypto-middleware-1.0.4.tgz#83b2c978bc502eeed13067e9603a54e0b8df01ae"
-  integrity sha512-TGZ0lYR8LxI+swWX3vVxhIGhKcDXlYR/cRiIFgjpca9xwmTSd0uvbJ2ZAkR801rMm+xn8F/j+0t5Tn7jCLXylA==
+decentraland-crypto-middleware@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/decentraland-crypto-middleware/-/decentraland-crypto-middleware-1.1.0.tgz#3855a16bff7a4882d61cf8b3d056817224ff8fe2"
+  integrity sha512-P55VRIQ1GHxRlJPPW6B+MGKzaT1PNdi/yrZrtmjKPSmaswXYtw9FOACK7uxmQEF2E6AstLVRXJ0DgI3FkQsnbQ==
   dependencies:
     dcl-crypto "^2.3.0"
     isomorphic-fetch "^3.0.0"
