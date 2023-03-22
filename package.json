@@ -30,7 +30,7 @@
   "dependencies": {
     "@dcl/catalyst-storage": "^2.0.3",
     "@dcl/crypto": "^3.3.1",
-    "@dcl/schemas": "^6.11.1",
+    "@dcl/schemas": "^6.13.4",
     "@well-known-components/env-config-provider": "^1.1.1",
     "@well-known-components/http-server": "^1.1.6-20220927190058.commit-2dfb235",
     "@well-known-components/interfaces": "^1.2.0",
